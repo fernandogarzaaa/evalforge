@@ -164,3 +164,20 @@ def test_flag_weights_exact() -> None:
     }
     assert flag_score(["unknown_a", "unknown_b"]) == 2.0
     assert flag_score(f for f in ["retried"]) == 3.0
+
+
+def test_default_threshold_for_length_and_latency_is_3_5() -> None:
+    # log1p word counts of 10..16 plus one long reply: 31 words -> z 3.98 (flagged), 26 words -> z 3.13 (not)
+    def lens(extra: int) -> list:
+        rs = [rec(request_id=f"r{n}", response=" ".join(["w"] * n)) for n in range(10, 17)]
+        return rs + [rec(request_id="x", response=" ".join(["w"] * extra))]
+
+    assert length_outliers(lens(31)) == {"x"}
+    assert length_outliers(lens(26)) == set()
+
+    def lat(extra: float) -> list:
+        rs = [rec(request_id=f"r{n}", latency_ms=float(n)) for n in range(10, 17)]
+        return rs + [rec(request_id="x", latency_ms=extra)]
+
+    assert latency_outliers(lat(31.0)) == {"x"}
+    assert latency_outliers(lat(26.0)) == set()

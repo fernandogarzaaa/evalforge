@@ -65,3 +65,45 @@ def test_summarize_rounds_to_four_places() -> None:
     assert s["by_metric"] == {"behavior": 0.3333, "contains": 0.3333, "not_contains": 1.0}
     assert s["by_category"]["c"] == {"n": 3, "pass_rate": 0.3333, "mean_score": 0.3333}
     assert s["by_difficulty"]["simple"]["pass_rate"] == 0.3333
+
+
+def test_multi_part_prompt_retrieves_exactly_two_entries() -> None:
+    by = {e.intent: e for e in KB}
+    p = "How do I reset my password? How do I get a refund? How do I cancel my subscription?"
+    out = MockModel("v1").complete([{"role": "user", "content": p}])
+    hits = [i for i in ("reset_password", "billing_refund", "cancel_subscription") if by[i].answer in out]
+    assert len(hits) == 2
+
+
+def test_score_case_rounds_contains_to_four_places() -> None:
+    from evalforge.evalrun import score_case
+
+    case = {
+        "id": "x",
+        "expected": {"behavior": "answer"},
+        "assertions": [
+            {"type": "contains", "value": "alpha"},
+            {"type": "contains", "value": "beta"},
+            {"type": "contains", "value": "gamma"},
+        ],
+    }
+    r = score_case(case, "alpha only")
+    assert r["metrics"]["contains"] == 0.3333 and r["score"] == round((1 + 1 / 3 + 1) / 3, 4)
+    assert r["missing"] == ["beta", "gamma"] and r["category"] == "unclustered" and r["difficulty"] == "unknown"
+
+
+def test_run_eval_is_deterministic_temperature_zero_seed_zero() -> None:
+    from evalforge.evalrun import run_eval
+
+    seen: list[tuple] = []
+
+    class Spy:
+        name = "spy"
+
+        def complete(self, messages, temperature=1.0, seed=None):  # type: ignore[no-untyped-def]
+            seen.append((temperature, seed))
+            return "ok"
+
+    case = {"id": "x", "messages": [{"role": "user", "content": "q"}], "expected": {"behavior": "answer"}}
+    rep = run_eval([case], Spy())
+    assert seen == [(0.0, 0)] and rep["model"] == "spy" and rep["n"] == 1

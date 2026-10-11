@@ -85,3 +85,8 @@ def test_detect_format_reads_exactly_4096_chars(tmp_path: Path) -> None:
     outside = tmp_path / "outside.json"
     outside.write_text(" " * (4097 - len(marker)) + marker + ": []", encoding="utf-8")
     assert detect_format(outside) == "jsonl"
+
+
+def test_otel_start_of_one_nanosecond_is_a_real_timestamp() -> None:
+    raw = otel_span_to_raw({"startTimeUnixNano": "1", "attributes": [_attr("gen_ai.request.model", stringValue="m")]})
+    assert raw is not None and raw["timestamp"] == "1970-01-01T00:00:00.000Z"

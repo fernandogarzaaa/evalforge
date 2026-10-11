@@ -108,3 +108,15 @@ def test_extract_json_variants() -> None:
         extract_json("[1, 2]")
     with pytest.raises(ValueError, match="unterminated"):
         extract_json('{"a": "}')
+
+
+@pytest.mark.parametrize("code", [429, 500, 502, 503, 504])
+def test_transient_status_is_reported_as_http_code(code: int, sleeps: list[float]) -> None:
+    with pytest.raises(LLMError, match=f"after 1 attempts: HTTP {code}$"):
+        _client(lambda r: httpx.Response(code), max_retries=1).complete([])
+
+
+def test_extract_json_empty_key_and_trailing_text() -> None:
+    assert extract_json('{"": 1}') == {"": 1}
+    assert extract_json('{"a": 1}x') == {"a": 1}
+    assert extract_json('{"a": 1}}') == {"a": 1}

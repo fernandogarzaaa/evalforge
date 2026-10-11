@@ -203,3 +203,48 @@ def test_seconds_until_ignores_seconds_of_now() -> None:
     now = datetime(2026, 9, 14, 1, 30, 45, 500, tzinfo=timezone.utc)
     assert seconds_until(now, "01:31") == pytest.approx(14.9995)
     assert seconds_until(now, "01:30") == pytest.approx(86400 - 45.0005)
+
+
+def test_budget_tiebreak_prefers_higher_hash() -> None:
+    # equal flags and coverage: _tiebreak("r1") > _tiebreak("r0"), so r1 wins the single slot
+    store = _store_with(["how do I reset my password", "refund for my last invoice"])
+    run_nightly(store, DAY, StubJudge(), cfg=PipelineConfig(budget=1, k_runs=1, min_cluster_size=50))
+    assert [c["source_log_ids"] for c in store.cases()] == [["r1"]]
+
+
+def test_priority_adds_coverage_boost_to_flag_score() -> None:
+    from evalforge.embed import HashingEmbedder
+
+    emb = HashingEmbedder()
+    pa, pb = "how do I reset my password", "refund for my last invoice"
+    store = Store(":memory:")
+    ca = store.upsert_category(None, "cat-a", emb.embed([pa])[0].tolist(), 5, DAY)
+    cb = store.upsert_category(None, "cat-b", emb.embed([pb])[0].tolist(), 5, DAY)
+    # cat-b already has an active case (coverage target 1 met -> boost 0); cat-a has none (boost 2.0)
+    filler = {
+        "id": "tc-filler",
+        "status": "active",
+        "category_id": cb,
+        "category": "cat-b",
+        "input": {"system": "", "prompt": "unrelated"},
+        "expected": {"behavior": "answer"},
+        "created_day": "2026-09-01",
+    }
+    store.add_case(filler, [0.0] * 2048)
+    recs = []
+    for rid, p, resp in (("a", pa, "Open Settings and click reset, then follow the emailed link."), ("b", pb, "ok")):
+        r = raw(request_id=rid, user_prompt=p, response=resp, timestamp=f"{DAY}T10:00:00Z", session_id=rid)
+        recs.append(LogRecord(**{k: v for k, v in r.items() if k in LogRecord.__dataclass_fields__}))
+    store.add_logs(recs)
+    cfg = PipelineConfig(budget=1, k_runs=1, min_cluster_size=50, coverage_target=1)
+    st = run_nightly(store, DAY, StubJudge(), cfg=cfg)
+    # a: no flags + boost 2.0 = 2.0 ; b: length_outlier 1.5 + boost 0 = 1.5 -> a is labeled
+    assert st["flag_counts"] == {"length_outlier": 1} and st["labeled"] == 1
+    new = [c for c in store.cases() if c["id"] != "tc-filler"]
+    assert [c["source_log_ids"] for c in new] == [["a"]] and new[0]["category_id"] == ca
+
+
+def test_dedup_with_empty_store_and_negative_threshold() -> None:
+    store = _store_with(PROMPTS[:3])
+    st = run_nightly(store, DAY, StubJudge(), cfg=PipelineConfig(k_runs=1, min_cluster_size=50, dedup_threshold=-1.0))
+    assert st["candidates"] == 3 and st["deduped"] == 2 and st["labeled"] == 1

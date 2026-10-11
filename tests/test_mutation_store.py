@@ -125,3 +125,12 @@ def test_tx_rolls_back_on_error(store: Store) -> None:
         raise RuntimeError("boom")
     assert store.pipeline_runs() == []
     assert np.asarray(store.case_embeddings()[1]).size == 0
+
+
+def test_close_releases_the_connection(tmp_path: Path) -> None:
+    import sqlite3
+
+    s = Store(tmp_path / "c.db")
+    s.close()
+    with pytest.raises(sqlite3.ProgrammingError):
+        s.count_logs()

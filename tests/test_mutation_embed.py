@@ -213,3 +213,33 @@ def test_cosine_matrix_unnormalised_and_empty_right() -> None:
     assert cosine_matrix(np.ones((3, 2)), np.zeros((0, 2))).shape == (3, 0)
     tiny = cosine_matrix(np.array([[1e-13, 0.0]]), np.array([[1.0, 0.0]]))
     assert tiny[0, 0] == pytest.approx(0.1, rel=1e-3)  # clamped at 1e-12, not divided by the tiny norm
+
+
+def test_fastembed_normalises_short_vectors(fake_fastembed) -> None:  # type: ignore[no-untyped-def]
+    e = FastEmbedEmbedder("m", cache_dir="/c")
+
+    class Half:
+        def embed(self, texts):  # type: ignore[no-untyped-def]
+            for _ in texts:
+                v = np.zeros(384, dtype=np.float32)
+                v[0] = 0.5
+                yield v
+
+    e.model = Half()  # type: ignore[assignment]
+    assert e.embed(["x"])[0, 0] == pytest.approx(1.0)
+
+
+def test_cached_embedder_refuses_pickled_cache(tmp_path: Path) -> None:
+    p = tmp_path / "evil.npz"
+    np.savez(p, texts=np.asarray([{"not": "text"}], dtype=object), vectors=np.zeros((1, 2)))
+    with pytest.raises(ValueError):
+        CachedEmbedder(HashingEmbedder(), str(p))
+
+
+def test_cosine_matrix_single_elements_and_empty_dtype() -> None:
+    assert cosine_matrix(np.array([[2.0]]), np.array([[3.0], [-1.0]]))[0].tolist() == pytest.approx([1.0, -1.0])
+    assert cosine_matrix(np.array([[3.0], [-1.0]]), np.array([[2.0]]))[:, 0].tolist() == pytest.approx([1.0, -1.0])
+    left = cosine_matrix(np.zeros((0, 2)), np.ones((2, 2)))
+    right = cosine_matrix(np.ones((2, 2)), np.zeros((0, 2)))
+    assert left.dtype == np.float32 and right.dtype == np.float32
+    assert left.shape == (0, 2) and right.shape == (2, 0)

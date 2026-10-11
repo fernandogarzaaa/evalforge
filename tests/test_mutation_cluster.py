@@ -151,3 +151,89 @@ def test_noise_uses_merged_centroids_and_clusters_sorted() -> None:
     out = assign_categories(list("abcde"), x, np.array([7, 7, 3, 3, -1]), existing, match_threshold=2.0)
     assert [u["members"] for u in out.updates] == [[2, 3], [0, 1]]  # cluster ids processed in sorted order
     assert out.category_ids[4] is None
+
+
+class _Spy:
+    """Records constructor kwargs and inputs of the sklearn estimators cluster_embeddings uses."""
+
+    def __init__(self, real: type, log: list) -> None:
+        self.real, self.log = real, log
+
+    def __call__(self, **kw):  # type: ignore[no-untyped-def]
+        est = self.real(**kw)
+        log = self.log
+
+        class Wrapped:
+            def fit_transform(self, x):  # type: ignore[no-untyped-def]
+                log.append(("fit_transform", kw, np.array(x)))
+                return est.fit_transform(x)
+
+            def fit_predict(self, x):  # type: ignore[no-untyped-def]
+                log.append(("fit_predict", kw, np.array(x)))
+                return est.fit_predict(x)
+
+        return Wrapped()
+
+
+@pytest.fixture()
+def spy(monkeypatch: pytest.MonkeyPatch) -> list:
+    import evalforge.cluster as cl
+
+    log: list = []
+    monkeypatch.setattr(cl, "TruncatedSVD", _Spy(cl.TruncatedSVD, log))
+    monkeypatch.setattr(cl, "HDBSCAN", _Spy(cl.HDBSCAN, log))
+    return log
+
+
+def test_cluster_estimator_configuration(spy: list) -> None:
+    x = np.random.default_rng(0).random((60, 64)).astype(np.float32)
+    cluster_embeddings(x)
+    (svd_call, svd_kw, _), (hdb_call, hdb_kw, z) = spy
+    assert svd_call == "fit_transform" and svd_kw == {"n_components": 48, "random_state": 0}
+    assert hdb_call == "fit_predict" and hdb_kw == {"min_cluster_size": 5, "min_samples": 2, "copy": True}
+    assert z.shape == (60, 48)
+    assert np.linalg.norm(z, axis=1) == pytest.approx(np.ones(60), abs=1e-6)
+
+
+def test_cluster_svd_dims_capped_by_rows_and_features(spy: list) -> None:
+    rng = np.random.default_rng(1)
+    cluster_embeddings(rng.random((10, 64)), min_cluster_size=3, seed=7)
+    assert spy[0][1] == {"n_components": 9, "random_state": 7}
+    spy.clear()
+    cluster_embeddings(rng.random((30, 6)), min_cluster_size=3, svd_dims=48)
+    assert spy[0][1]["n_components"] == 5
+    spy.clear()
+    cluster_embeddings(rng.random((30, 64)), min_cluster_size=3, svd_dims=4)
+    assert spy[0][1]["n_components"] == 4
+
+
+def test_cluster_skips_svd_below_two_dims_and_normalises_raw_rows(spy: list) -> None:
+    x = np.array([[0.3, 0.4], [0.6, 0.8], [0.0, 0.5], [0.0, 0.25]], dtype=np.float64)
+    cluster_embeddings(x, min_cluster_size=2)  # dims = min(48, 3, 1) = 1 -> no SVD
+    assert [c[0] for c in spy] == ["fit_predict"]
+    z = spy[0][2]
+    np.testing.assert_allclose(z, [[0.6, 0.8], [0.6, 0.8], [0.0, 1.0], [0.0, 1.0]], atol=1e-9)
+    spy.clear()
+    three = np.random.default_rng(2).random((3, 3))  # dims = 2 -> SVD runs
+    cluster_embeddings(three, min_cluster_size=2)
+    assert [c[0] for c in spy] == ["fit_transform", "fit_predict"] and spy[0][1]["n_components"] == 2
+
+
+def test_cluster_runs_hdbscan_exactly_at_the_size_guard(spy: list) -> None:
+    rng = np.random.default_rng(3)
+    cluster_embeddings(rng.random((3, 8)), min_cluster_size=2)  # n == max(3, 2)
+    assert spy and spy[-1][0] == "fit_predict"
+    spy.clear()
+    cluster_embeddings(rng.random((5, 8)), min_cluster_size=5)  # n == min_cluster_size
+    assert spy and spy[-1][0] == "fit_predict"
+    spy.clear()
+    assert cluster_embeddings(rng.random((4, 8))).tolist() == [-1] * 4  # 4 < default 5
+    assert spy == []
+    cluster_embeddings(rng.random((5, 8)))  # 5 == default 5
+    assert spy and spy[-1][1]["min_cluster_size"] == 5
+
+
+def test_assign_with_no_existing_never_matches_even_at_negative_thresholds() -> None:
+    x = np.asarray([_unit(0), _unit(0), _unit(1)], dtype=np.float32)
+    out = assign_categories(["a", "b", "c"], x, np.array([0, 0, -1]), [], match_threshold=-1.0, noise_threshold=-1.0)
+    assert out.updates[0]["id"] is None and out.category_ids == [None, None, None]
