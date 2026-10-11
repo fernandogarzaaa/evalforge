@@ -320,7 +320,22 @@ wheel/sdist build on Python 3.10 and 3.12 for every push and PR.
 Mutation testing measures whether the tests actually fail when the code is broken.
 Modules graded so far (killed / total mutants):
 
-<!-- MUTATION-TABLE -->
+| Module | Score | Killed / total | Scope of the run |
+|---|---|---|---|
+| `store.py` | **86.8%** | 46 / 53 | all operators; `test_ingest.py` + `test_pipeline_store.py` (excluding the end-to-end test) |
+| `anomaly.py` | **81.7%** | 67 / 82 | all operators; `test_signals_judge.py` |
+| `judge.py` | 81.0% (partial) | 64 / 79 | comparison, return-value, arithmetic, boolean, remove-call only; the 73 `constant` mutants (thresholds and weights) did not fit the run budget and are **ungraded** |
+| `llm.py` | 61.3% | 38 / 62 | all operators; `test_signals_judge.py` |
+| `embed.py` | 60.6% | 40 / 66 | all operators; embedder unit tests only. 11 mutants are uncovered, mostly the optional `FastEmbedEmbedder` path, which no test exercises |
+| `cluster.py` | 58.6% | 34 / 58 | all operators; cluster unit tests (excluding the end-to-end test) |
+| `pipeline.py` | 54.2% (sampled) | 13 / 24 | evenly sampled 24 of 77 mutants (`--max-mutants 24`); full grading needs the slow end-to-end test per mutant |
+
+Survivors cluster around tuning constants (thresholds, minimum sizes, epsilons) and
+boundary comparisons (`>=` vs `>`), which the current tests do not pin. They are the
+first place to add tests. The remaining modules in `[tool.testteeth] paths` (schema,
+redact, sampling, dedup, labeling, heuristics, metrics, regression, export, evalrun,
+curation, adapters, ingest) were graded during development; their scores are not
+re-recorded here.
 
 ## Known gaps
 
