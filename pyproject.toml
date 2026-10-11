@@ -1,0 +1,105 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evalforge"
+version = "0.1.0"
+description = "Turn production LLM logs into a growing, labeled, deduplicated evaluation dataset."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Fernando Garza" }]
+keywords = ["llm", "evaluation", "eval-dataset", "llm-as-judge", "hdbscan", "mlops"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.24,<3",
+  "scikit-learn>=1.3,<2",  # 1.3 is the first release with sklearn.cluster.HDBSCAN
+  "httpx>=0.27,<1",
+]
+
+[project.optional-dependencies]
+semantic = ["fastembed>=0.9,<0.10"]
+dashboard = ["streamlit>=1.35,<2", "pandas>=2,<3"]
+dev = [
+  "pytest>=8,<10",
+  "ruff==0.17.0",
+  "mypy==2.4.0",
+  "testteeth==0.2.0",
+  "build>=1.2,<2",
+]
+
+[project.scripts]
+evalforge = "evalforge.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/fernandogarzaaa/evalforge"
+
+[tool.setuptools.packages.find]
+include = ["evalforge*"]
+
+[tool.setuptools.package-data]
+evalforge = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"
+markers = ["slow: end-to-end CLI tests (excluded from mutation runs)"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["results"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "S"]
+ignore = [
+  "B905",  # zip() without strict= is intentional where lengths are equal by construction
+  "S101",  # assert is fine in tests
+  "S311",  # random is used for reproducible sampling/simulation, not crypto
+  "S324",  # sha1/md5 are content fingerprints, not security
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "E501"]
+"evalforge/kb.py" = ["E501"]  # knowledge-base prose
+"evalforge/synth.py" = ["E501"]  # synthetic prompt/response templates
+
+[tool.mypy]
+python_version = "3.10"
+packages = ["evalforge"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+
+[tool.testteeth]
+paths = [
+  "evalforge/schema.py",
+  "evalforge/redact.py",
+  "evalforge/sampling.py",
+  "evalforge/dedup.py",
+  "evalforge/labeling.py",
+  "evalforge/heuristics.py",
+  "evalforge/regression.py",
+  "evalforge/metrics.py",
+  "evalforge/export.py",
+  "evalforge/evalrun.py",
+  "evalforge/anomaly.py",
+  "evalforge/judge.py",
+  "evalforge/curation.py",
+  "evalforge/adapters.py",
+  "evalforge/ingest.py",
+  "evalforge/cluster.py",
+  "evalforge/llm.py",
+  "evalforge/pipeline.py",
+]
+test_args = ["tests", "-q", "-x", "-p", "no:cacheprovider", "-m", "not slow"]
