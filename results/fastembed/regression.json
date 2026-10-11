@@ -1,0 +1,141 @@
+{
+  "previous_model": "mock:v1",
+  "current_model": "mock:v2",
+  "compared": 164,
+  "added_cases": [],
+  "new_failures": [
+    "tc-0ca4f8127591",
+    "tc-3c364b7a664a",
+    "tc-531d497acf57",
+    "tc-5468e2800220",
+    "tc-5e7ea864cea3",
+    "tc-6259177805d2",
+    "tc-7ddcd8d8622c",
+    "tc-8c81b5cb9a4f",
+    "tc-c5fd9b2a2b22",
+    "tc-cdd3f10323c5",
+    "tc-ce605ea49216",
+    "tc-e3a63e524412",
+    "tc-ed3e04e11c72"
+  ],
+  "new_passes": [],
+  "score_changes": [
+    {
+      "id": "tc-0ca4f8127591",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-3c364b7a664a",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-531d497acf57",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-5468e2800220",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-5e7ea864cea3",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-6259177805d2",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-7ddcd8d8622c",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-8c81b5cb9a4f",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-c5fd9b2a2b22",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-cdd3f10323c5",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-ce605ea49216",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-e3a63e524412",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    },
+    {
+      "id": "tc-ed3e04e11c72",
+      "before": 1.0,
+      "after": 0.3333,
+      "delta": -0.6667
+    }
+  ],
+  "category_shifts": [
+    {
+      "category": "combine / customer / names",
+      "before": 1.0,
+      "after": 0.0,
+      "delta": -1.0
+    },
+    {
+      "category": "count / customer / orders",
+      "before": 1.0,
+      "after": 0.0,
+      "delta": -1.0
+    },
+    {
+      "category": "counts / customer / duplicates",
+      "before": 1.0,
+      "after": 0.0,
+      "delta": -1.0
+    },
+    {
+      "category": "customer / sql / order",
+      "before": 1.0,
+      "after": 0.0,
+      "delta": -1.0
+    },
+    {
+      "category": "customers / difference / explain",
+      "before": 1.0,
+      "after": 0.0,
+      "delta": -1.0
+    },
+    {
+      "category": "unclustered",
+      "before": 0.96,
+      "after": 0.84,
+      "delta": -0.12
+    }
+  ],
+  "regressed": true
+}

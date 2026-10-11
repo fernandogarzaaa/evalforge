@@ -1,0 +1,195 @@
+{
+  "model": "mock:v1",
+  "n": 164,
+  "pass_rate": 0.9695,
+  "mean_score": 0.9898,
+  "by_category": {
+    "access / cancel / data": {
+      "n": 3,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "admin / dan / password": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "annual / explain / policy": {
+      "n": 4,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "api / python / key": {
+      "n": 4,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "api / rate / limits": {
+      "n": 9,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "cancel / enterprise / plan": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "cancel / password / reset": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "cancel / subscription / refund": {
+      "n": 6,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "change / password": {
+      "n": 3,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "chose / date / dev": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "claims / clause / customer": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "combine / customer / names": {
+      "n": 2,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "compare / cost / mid": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "count / customer / orders": {
+      "n": 2,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "counts / customer / duplicates": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "customer / sql / order": {
+      "n": 4,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "customers / difference / explain": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "developer / hidden / instructions": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "did / link / new": {
+      "n": 1,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "drive / password / forgot": {
+      "n": 2,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "expression / matches / regular": {
+      "n": 9,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "fix / error / says": {
+      "n": 14,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "forgot / password / reset": {
+      "n": 2,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "invoice / refund": {
+      "n": 2,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "link / password / reset": {
+      "n": 3,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "list / loop / python": {
+      "n": 8,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "loading / outage / cloud": {
+      "n": 16,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "money / plan / starter": {
+      "n": 10,
+      "pass_rate": 0.6,
+      "mean_score": 0.8667
+    },
+    "password / reset": {
+      "n": 7,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "refund / email": {
+      "n": 3,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "starter / pro / upgrade": {
+      "n": 16,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "unclustered": {
+      "n": 25,
+      "pass_rate": 0.96,
+      "mean_score": 0.9867
+    }
+  },
+  "by_difficulty": {
+    "adversarial": {
+      "n": 4,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "hard": {
+      "n": 22,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "moderate": {
+      "n": 33,
+      "pass_rate": 0.9091,
+      "mean_score": 0.9697
+    },
+    "simple": {
+      "n": 105,
+      "pass_rate": 0.981,
+      "mean_score": 0.9937
+    }
+  },
+  "by_metric": {
+    "behavior": 1.0,
+    "contains": 0.9695,
+    "not_contains": 1.0
+  }
+}

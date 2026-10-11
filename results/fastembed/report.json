@@ -1,0 +1,268 @@
+{
+  "config": {
+    "days": 14,
+    "per_day": 600,
+    "seed": 7,
+    "embedder": "fastembed",
+    "sample_size": 300,
+    "budget": 60,
+    "out": "results/fastembed",
+    "cache": "/tmp/efb/fe_cache.npz",
+    "records_emitted": 7749
+  },
+  "pipeline_seconds": 27.5,
+  "ingest": {
+    "read": 7760,
+    "invalid": 138,
+    "duplicates": 238,
+    "stored": 7384,
+    "errors": {
+      "unparseable": 11,
+      "latency_ms must be a non-negative number": 30,
+      "user_prompt is required": 25,
+      "feedback must be 'up', 'down' or null": 40,
+      "timestamp is not ISO-8601": 29,
+      "timestamp is required": 3
+    },
+    "redactions": {
+      "phone": 174,
+      "ipv4": 185,
+      "email": 170,
+      "credit_card": 174
+    }
+  },
+  "redaction": {
+    "pii_values": 703,
+    "leaked": 0,
+    "recall_pct": 100.0,
+    "false_positive_placeholders": 0
+  },
+  "sampling": {
+    "population_edge_share_pct": 24.4,
+    "uniform": {
+      "edge_share": 24.2,
+      "bad_share": 15.0,
+      "strata_coverage": 94.4
+    },
+    "stratified": {
+      "edge_share": 23.9,
+      "bad_share": 14.7,
+      "strata_coverage": 100.0
+    },
+    "signal": {
+      "edge_share": 33.8,
+      "bad_share": 21.3,
+      "strata_coverage": 98.0
+    }
+  },
+  "clustering": {
+    "mean_ari": 0.365,
+    "mean_purity_pct": 92.8,
+    "mean_noise_pct": 14.3,
+    "novel_prompts_in_noise_pct": 93.2,
+    "true_intents": 18,
+    "persistent_categories": 35
+  },
+  "signals": {
+    "retry_detection": {
+      "precision": 1.0,
+      "recall": 0.9828,
+      "f1": 0.9913,
+      "tp": 457,
+      "predicted": 457,
+      "actual": 465
+    },
+    "latency_outliers": {
+      "precision": 0.875,
+      "recall": 0.9333,
+      "f1": 0.9032,
+      "tp": 126,
+      "predicted": 144,
+      "actual": 135
+    }
+  },
+  "difficulty": {
+    "accuracy_pct": 96.8,
+    "per_class_recall_pct": {
+      "adversarial": 100.0,
+      "hard": 100.0,
+      "moderate": 97.5,
+      "simple": 95.7
+    },
+    "truth_distribution": {
+      "simple": 4210,
+      "moderate": 2121,
+      "hard": 715,
+      "adversarial": 338
+    }
+  },
+  "labeling": {
+    "judge": "mock-judge (heuristic + seeded noise), NOT an LLM",
+    "cases_labeled": 201,
+    "auto_routed": 164,
+    "review_routed": 37,
+    "auto": {
+      "behavior_ok": 98.8,
+      "bucket_ok": 93.3,
+      "polarity_ok": 94.5
+    },
+    "review": {
+      "behavior_ok": 94.6,
+      "bucket_ok": 67.6,
+      "polarity_ok": 67.6
+    },
+    "all": {
+      "behavior_ok": 98.0,
+      "bucket_ok": 88.6,
+      "polarity_ok": 89.6
+    },
+    "run_pairwise_agreement_pct": 92.7,
+    "run0_vs_run1_kappa": 0.868
+  },
+  "dataset": {
+    "nights": 14,
+    "candidates": 4200,
+    "deduped": 3959,
+    "dedup_pct": 94.3,
+    "judge_calls": 603,
+    "active_cases": 164,
+    "pending_review": 37,
+    "categories_with_cases": 32,
+    "true_intents_covered": 18,
+    "by_difficulty": {
+      "simple": 105,
+      "moderate": 33,
+      "hard": 22,
+      "adversarial": 4
+    },
+    "by_polarity": {
+      "negative": 86,
+      "positive": 78
+    },
+    "final_coverage_ratio_pct": 22.2,
+    "freshness_30d_pct": 100.0,
+    "growth": [
+      {
+        "day": "2026-09-14",
+        "auto_added": 54,
+        "queued": 6,
+        "deduped": 200,
+        "total_active": 54
+      },
+      {
+        "day": "2026-09-15",
+        "auto_added": 44,
+        "queued": 11,
+        "deduped": 245,
+        "total_active": 98
+      },
+      {
+        "day": "2026-09-16",
+        "auto_added": 11,
+        "queued": 5,
+        "deduped": 284,
+        "total_active": 109
+      },
+      {
+        "day": "2026-09-17",
+        "auto_added": 10,
+        "queued": 2,
+        "deduped": 288,
+        "total_active": 119
+      },
+      {
+        "day": "2026-09-18",
+        "auto_added": 6,
+        "queued": 3,
+        "deduped": 291,
+        "total_active": 125
+      },
+      {
+        "day": "2026-09-19",
+        "auto_added": 9,
+        "queued": 1,
+        "deduped": 290,
+        "total_active": 134
+      },
+      {
+        "day": "2026-09-20",
+        "auto_added": 3,
+        "queued": 3,
+        "deduped": 294,
+        "total_active": 137
+      },
+      {
+        "day": "2026-09-21",
+        "auto_added": 5,
+        "queued": 2,
+        "deduped": 293,
+        "total_active": 142
+      },
+      {
+        "day": "2026-09-22",
+        "auto_added": 8,
+        "queued": 0,
+        "deduped": 292,
+        "total_active": 150
+      },
+      {
+        "day": "2026-09-23",
+        "auto_added": 5,
+        "queued": 1,
+        "deduped": 294,
+        "total_active": 155
+      },
+      {
+        "day": "2026-09-24",
+        "auto_added": 6,
+        "queued": 0,
+        "deduped": 294,
+        "total_active": 161
+      },
+      {
+        "day": "2026-09-25",
+        "auto_added": 2,
+        "queued": 2,
+        "deduped": 296,
+        "total_active": 163
+      },
+      {
+        "day": "2026-09-26",
+        "auto_added": 1,
+        "queued": 1,
+        "deduped": 298,
+        "total_active": 164
+      },
+      {
+        "day": "2026-09-27",
+        "auto_added": 0,
+        "queued": 0,
+        "deduped": 300,
+        "total_active": 164
+      }
+    ]
+  },
+  "eval": {
+    "cases": 164,
+    "v1": {
+      "pass_rate_pct": 97.0,
+      "mean_score": 0.9898
+    },
+    "v2": {
+      "pass_rate_pct": 89.0,
+      "mean_score": 0.937
+    },
+    "new_failures": 13,
+    "new_passes": 0,
+    "new_failures_by_true_intent": {
+      "sql_window": 3,
+      "sql_aggregate": 6,
+      "prompt_injection": 1,
+      "sql_join": 3
+    },
+    "new_failures_in_injected_regression_areas_pct": 100.0,
+    "injected_area_cases_caught_pct": 81.2,
+    "category_shifts": 6,
+    "regressed": true
+  }
+}
