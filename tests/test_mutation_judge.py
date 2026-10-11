@@ -293,3 +293,45 @@ def test_noise_sequence_is_reproducible_across_versions() -> None:
     runs = [j.label("p", "r", run_index=i, key="k") for i in range(16)]
     assert [lb.quality for lb in runs] == [4, 2, 4, 2, 2, 4, 2, 4, 2, 2, 4, 4, 2, 4, 2, 2]
     assert "".join(lb.behavior[0] for lb in runs) == "caaaaaacarraaaaa"
+
+
+def test_retriever_vectorizer_configuration_and_default_k() -> None:
+    r = KBRetriever()
+    v = r.vectorizer
+    assert v.ngram_range == (1, 2) and v.sublinear_tf is True
+    assert {"acme", "cloud", "the", "thanks"} <= set(v.stop_words)
+    assert len(r.retrieve("reset password refund invoice")) == 1
+    assert len(r.retrieve("reset password refund invoice", k=2)) == 2
+
+
+SINGLE_TWO_TOPICS = "How do I cancel or upgrade my plan"
+NEUTRAL = "Here is how to do that in a few steps."
+
+
+def test_single_part_prompt_uses_one_source_entry() -> None:
+    by = {e.intent: e for e in KB}
+    label, _ = J.assess(SINGLE_TWO_TOPICS, NEUTRAL)
+    assert label.must_contain == list(by["upgrade_plan"].key_facts)
+    three = "How do I reset my password? How do I get a refund? How do I cancel my subscription?"
+    label3, _ = J.assess(three, NEUTRAL)
+    assert len(label3.must_contain) == 4  # two entries x two key facts, never three entries
+
+
+def test_llm_judge_source_fact_count_follows_multi_part() -> None:
+    j = LLMJudge(_Fake("{}"), retriever=_RETRIEVER)
+    one = json.loads(j.messages(SINGLE_TWO_TOPICS, NEUTRAL, None)[1]["content"])
+    assert len(one["source_facts"]) == 1
+    three = "How do I reset my password? How do I get a refund? How do I cancel my subscription?"
+    two = json.loads(j.messages(three, NEUTRAL, None)[1]["content"])
+    assert len(two["source_facts"]) == 2
+
+
+def test_default_run_index_is_zero() -> None:
+    fake = _Fake('{"quality": 3}')
+    LLMJudge(fake, retriever=_RETRIEVER).label(PW, "r")
+    assert fake.calls[0][2] == 0
+    j = _stub(1.0, 3, 0.0)
+    defaults = [(lb.quality, lb.behavior) for lb in (j.label("p", "r", key=f"k{i}") for i in range(12))]
+    zeros = [(lb.quality, lb.behavior) for lb in (j.label("p", "r", run_index=0, key=f"k{i}") for i in range(12))]
+    ones = [(lb.quality, lb.behavior) for lb in (j.label("p", "r", run_index=1, key=f"k{i}") for i in range(12))]
+    assert defaults == zeros and defaults != ones
