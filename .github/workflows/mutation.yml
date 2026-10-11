@@ -1,0 +1,85 @@
+name: Mutation
+
+# Mutation testing with testteeth, one job per module. It is informational: it never blocks a
+# merge (continue-on-error) and runs weekly, on demand, and when library code or tests change on main.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
+  push:
+    branches: [main]
+    paths: ["evalforge/**", "tests/**", ".github/workflows/mutation.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mutate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - schema
+          - redact
+          - sampling
+          - dedup
+          - labeling
+          - heuristics
+          - regression
+          - metrics
+          - export
+          - evalrun
+          - anomaly
+          - judge
+          - curation
+          - adapters
+          - ingest
+          - cluster
+          - llm
+          - pipeline
+          - embed
+          - store
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: testteeth run evalforge/${{ matrix.module }}.py
+        run: |
+          testteeth run "evalforge/${{ matrix.module }}.py" \
+            --pytest-args "tests -q -x -p no:cacheprovider -m 'not slow'" \
+            --json "mutation-${{ matrix.module }}.json" --fail-under 85
+      - name: Summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          p = pathlib.Path("mutation-${{ matrix.module }}.json")
+          if not p.exists():
+              print("no report for ${{ matrix.module }}")
+          else:
+              d = json.loads(p.read_text())
+              print(f"### `${{ matrix.module }}.py`: {d['score']}% ({d['killed']}/{d['total']} killed, "
+                    f"{d['survived']} survived, {d['no_coverage']} not covered, {d['timeouts']} timeouts)")
+              for m in d["mutants"]:
+                  if m["status"] not in ("killed", "timeout"):
+                      print(f"- L{m['line']} `{m['function']}`: {m['description']} ({m['status']})")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-${{ matrix.module }}
+          path: mutation-${{ matrix.module }}.json
+          if-no-files-found: ignore

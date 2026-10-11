@@ -101,5 +101,7 @@ paths = [
   "evalforge/cluster.py",
   "evalforge/llm.py",
   "evalforge/pipeline.py",
+  "evalforge/embed.py",
+  "evalforge/store.py",
 ]
 test_args = ["tests", "-q", "-x", "-p", "no:cacheprovider", "-m", "not slow"]
