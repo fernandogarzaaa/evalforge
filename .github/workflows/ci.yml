@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,3 +35,25 @@ jobs:
         run: pytest -q
       - name: Build sdist/wheel
         run: python -m build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t evalforge:ci .
+      - name: Smoke test (--version, --help)
+        run: |
+          docker run --rm evalforge:ci --version
+          docker run --rm evalforge:ci --help
+      - name: Smoke test (offline demo into a named volume)
+        run: |
+          docker volume create evalforge-ci
+          docker run --rm -v evalforge-ci:/data evalforge:ci demo --dir /data/demo --days 2 --per-day 30 | tee demo.json
+          python3 -c "import json; d=json.load(open('demo.json')); assert d['logs_stored'] > 0 and d['active_cases'] > 0, d; print('demo ok', d['logs_stored'], d['active_cases'])"
+          docker run --rm -v evalforge-ci:/data evalforge:ci stats --db /data/demo/evalforge.db
+      - name: Runs as non-root
+        run: test "$(docker run --rm --entrypoint id evalforge:ci -u)" != "0"
+      - name: docker compose config
+        run: |
+          if ls compose.y*ml docker-compose.y*ml >/dev/null 2>&1; then docker compose config; else echo "no compose file in repo; skipped"; fi
