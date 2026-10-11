@@ -332,10 +332,10 @@ Modules graded so far (killed / total mutants):
 
 Survivors cluster around tuning constants (thresholds, minimum sizes, epsilons) and
 boundary comparisons (`>=` vs `>`), which the current tests do not pin. They are the
-first place to add tests. The remaining modules in `[tool.testteeth] paths` (schema,
-redact, sampling, dedup, labeling, heuristics, metrics, regression, export, evalrun,
-curation, adapters, ingest) were graded during development; their scores are not
-re-recorded here.
+first place to add tests. `schema`, `redact`, `sampling`, `dedup`, `labeling`,
+`heuristics` and `metrics` were graded earlier in development but those reports were
+not preserved, so their scores are not listed. `regression`, `export`, `evalrun`,
+`curation`, `adapters` and `ingest` have no recorded grade yet.
 
 ## Known gaps
 
