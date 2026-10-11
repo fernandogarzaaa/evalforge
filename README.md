@@ -49,6 +49,14 @@ pip install -e ".[dashboard]"      # optional: Streamlit review dashboard
 Core dependencies are deliberately small: `numpy`, `scikit-learn` (>= 1.3 for
 `sklearn.cluster.HDBSCAN`) and `httpx`.
 
+Or with Docker (the image runs as a non-root user and keeps its database in `/data`):
+
+```bash
+docker build -t evalforge .
+docker run --rm -v evalforge-data:/data evalforge demo --dir /data/demo
+docker run --rm -v evalforge-data:/data evalforge stats --db /data/demo/evalforge.db
+```
+
 ### Using a real LLM (optional)
 
 All network access goes through one OpenAI-compatible client configured from the
@@ -308,34 +316,59 @@ directly, but evalforge has no dependency on it, and the built-in `evalforge eva
 ```bash
 ruff check . && ruff format --check .
 mypy                       # strict on evalforge/ (disallow_untyped_defs)
-pytest -q                  # 189 tests, all offline, ~1 min
+pytest -q                  # 353 tests, all offline, ~10 s
 testteeth run              # mutation testing (configured in pyproject.toml)
 ```
 
 CI (`.github/workflows/ci.yml`) runs lint, format, mypy, the full test suite and a
-wheel/sdist build on Python 3.10 and 3.12 for every push and PR.
+wheel/sdist build on Python 3.10, 3.11 and 3.12 for every push and PR. A `docker` job
+builds the image and smoke-tests it: `--version`, `--help`, the offline `demo` writing into
+a named volume (asserting it stored logs and produced active cases), `stats` against that
+database, and a check that the container does not run as root. There is no compose file,
+so there is nothing for `docker compose config` to validate (the step reports a skip).
 
 ### Mutation scores (testteeth 0.2.0)
 
 Mutation testing measures whether the tests actually fail when the code is broken.
-Modules graded so far (killed / total mutants):
+`.github/workflows/mutation.yml` grades every library module in its own job (all
+operators, every mutant, no sampling, `pytest tests -m "not slow"`). It is informational:
+it runs weekly, on demand and when `evalforge/` or `tests/` change on `main`, and it never
+blocks a merge. Each job fails visibly below 85% and uploads its JSON report.
 
-| Module | Score | Killed / total | Scope of the run |
+Numbers below are from GitHub Actions runs of that workflow: "before" is the original test
+suite (commit `d79d65a`), "after" is the current suite. Killed / total mutants:
+
+| Module | Before | After | Surviving mutants now and why they are left |
 |---|---|---|---|
-| `store.py` | **86.8%** | 46 / 53 | all operators; `test_ingest.py` + `test_pipeline_store.py` (excluding the end-to-end test) |
-| `anomaly.py` | **81.7%** | 67 / 82 | all operators; `test_signals_judge.py` |
-| `judge.py` | 81.0% (partial) | 64 / 79 | comparison, return-value, arithmetic, boolean, remove-call only; the 73 `constant` mutants (thresholds and weights) did not fit the run budget and are **ungraded** |
-| `llm.py` | 61.3% | 38 / 62 | all operators; `test_signals_judge.py` |
-| `embed.py` | 60.6% | 40 / 66 | all operators; embedder unit tests only. 11 mutants are uncovered, mostly the optional `FastEmbedEmbedder` path, which no test exercises |
-| `cluster.py` | 58.6% | 34 / 58 | all operators; cluster unit tests (excluding the end-to-end test) |
-| `pipeline.py` | 54.2% (sampled) | 13 / 24 | evenly sampled 24 of 77 mutants (`--max-mutants 24`); full grading needs the slow end-to-end test per mutant |
+| `adapters.py` | 84.6% (44/52) | **100%** (52/52) | none |
+| `anomaly.py` | 81.7% (67/82) | **100%** (82/82) | none |
+| `cluster.py` | 60.3% (35/58) | **100%** (58/58) | none |
+| `curation.py` | 76.6% (36/47) | **97.9%** (46/47) | 1 equivalent: flipping `== "reject"` swaps the two verdict labels everywhere, and Cohen's kappa is invariant under relabeling |
+| `dedup.py` | 97.1% (34/35) | **100%** (35/35) | none |
+| `embed.py` | 68.7% (46/67, 11 uncovered) | **98.5%** (66/67) | 1 equivalent: the zero-norm placeholder `1` -> `2` (a zero row divided by either is zero) |
+| `evalrun.py` | 76.0% (57/75) | **98.7%** (74/75) | 1 equivalent: default `temperature` of `MockModel.complete`, which the mock never reads |
+| `export.py` | 84.6% (22/26) | **100%** (26/26) | none |
+| `heuristics.py` | 100% (26/26) | **100%** (26/26) | none |
+| `ingest.py` | 86.4% (38/44) | **95.5%** (42/44) | 2 equivalent: the file-hash read chunk size (`1 << 16`), which cannot change the digest |
+| `judge.py` | 74.2% (115/155) | **97.4%** (151/155) | 4 equivalent or unreachable: a `Protocol` default, `best = 0.0` for an empty knowledge base (TF-IDF cannot be fitted on one), and two `rng.random() < p` vs `<=` flips that differ only when the float draw equals `p` exactly |
+| `labeling.py` | 97.2% (35/36) | **100%** (36/36) | none |
+| `llm.py` | 61.3% (38/62) | **96.8%** (60/62) | 1 equivalent (`Protocol` default) and 1 unreachable `raise` (the scanned text always starts at `{`, so `json.loads` returns a dict) |
+| `metrics.py` | 98.6% (70/71) | **98.6%** (70/71) | 1 equivalent: `majority.get(c, 0)` -> `1` (every count is at least 1) |
+| `pipeline.py` | 53.2% (41/77) | **100%** (77/77) | none |
+| `redact.py` | 97.8% (44/45) | **97.8%** (44/45) | 1 equivalent: Luhn `total += n` -> `-=` (`-t % 10 == 0` iff `t % 10 == 0`) |
+| `regression.py` | 100% (20/20) | **100%** (20/20) | none |
+| `sampling.py` | 95.7% (66/69) | **95.7%** (66/69) | 3 equivalent: `allocate`'s early returns (`total == 0`, `n <= 0`, `n >= total`) produce the same allocation as the general path at those boundaries |
+| `schema.py` | 98.6% (72/73) | **98.6%** (72/73) | 1 equivalent: the missing-token default `0` -> `1` (both are valid counts) |
+| `store.py` | 87.0% (47/54) | **96.3%** (52/54) | 2 equivalent: `lastrowid or 0` -> `or 1` (`lastrowid` is always set after an `INSERT`) |
+| **Total** | **81.2%** (953/1174) | **98.4%** (1155/1174) | every remaining survivor is listed above |
 
-Survivors cluster around tuning constants (thresholds, minimum sizes, epsilons) and
-boundary comparisons (`>=` vs `>`), which the current tests do not pin. They are the
-first place to add tests. `schema`, `redact`, `sampling`, `dedup`, `labeling`,
-`heuristics` and `metrics` were graded earlier in development but those reports were
-not preserved, so their scores are not listed. `regression`, `export`, `evalrun`,
-`curation`, `adapters` and `ingest` have no recorded grade yet.
+Not graded: `cli.py` (argument wiring, exercised by the slow end-to-end CLI tests that
+mutation runs exclude), `dashboard.py` (Streamlit UI, untested by design), `synth.py`
+and `kb.py` (synthetic data and knowledge-base prose, not logic). The new tests are in `tests/test_mutation_*.py`: they pin
+boundaries (`>=` vs `>`), thresholds and weights, defaults, rounding, retry/backoff policy,
+the optional `fastembed` path (via a fake module, no download) and the pipeline's
+priority, budget and dedup logic with a stub judge, so `pipeline.py` no longer needs the
+slow end-to-end test to be graded.
 
 ## Known gaps
 
@@ -353,8 +386,8 @@ Being explicit about what is not done or not proven:
 - **The synthetic template corpus saturates in about two weeks.** New cases per night
   fall from ~55 to ~0-3 by day 14 because the generator draws from a finite set of
   templates. Long-horizon growth curves on real traffic are unknown.
-- **Docker is untested locally.** The `Dockerfile` has not been built or run in this
-  environment.
+- **Docker is smoke-tested in CI only.** The image is built and run on GitHub Actions
+  (see Testing), not on a developer machine, and no compose file is provided.
 - All headline accuracy numbers come from the mock judge on synthetic data, as stated in
   [Results](#results).
 - `schedule` is a simple in-process loop; production deployments should use cron, a

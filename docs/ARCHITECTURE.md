@@ -119,7 +119,7 @@ prompts are never paid for: 91.3% (hashing) / 94.3% (fastembed) of candidates we
 dropped this way over 14 nights, leaving 834 / 603 judge calls in total.
 
 ### Offline-first
-The mock judge and mock models make the pipeline, its 189 tests and CI deterministic and
+The mock judge and mock models make the pipeline, its 353 tests and CI deterministic and
 free. The mock judge's accuracy is reported as the accuracy of a heuristic on synthetic
 data, never as LLM accuracy.
 
