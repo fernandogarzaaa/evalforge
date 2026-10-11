@@ -1,0 +1,268 @@
+{
+  "config": {
+    "days": 14,
+    "per_day": 600,
+    "seed": 7,
+    "embedder": "hashing",
+    "sample_size": 300,
+    "budget": 60,
+    "out": "results/hashing",
+    "cache": null,
+    "records_emitted": 7749
+  },
+  "pipeline_seconds": 4.7,
+  "ingest": {
+    "read": 7760,
+    "invalid": 138,
+    "duplicates": 238,
+    "stored": 7384,
+    "errors": {
+      "unparseable": 11,
+      "latency_ms must be a non-negative number": 30,
+      "user_prompt is required": 25,
+      "feedback must be 'up', 'down' or null": 40,
+      "timestamp is not ISO-8601": 29,
+      "timestamp is required": 3
+    },
+    "redactions": {
+      "phone": 174,
+      "ipv4": 185,
+      "email": 170,
+      "credit_card": 174
+    }
+  },
+  "redaction": {
+    "pii_values": 703,
+    "leaked": 0,
+    "recall_pct": 100.0,
+    "false_positive_placeholders": 0
+  },
+  "sampling": {
+    "population_edge_share_pct": 24.4,
+    "uniform": {
+      "edge_share": 24.2,
+      "bad_share": 15.0,
+      "strata_coverage": 94.4
+    },
+    "stratified": {
+      "edge_share": 23.9,
+      "bad_share": 14.7,
+      "strata_coverage": 100.0
+    },
+    "signal": {
+      "edge_share": 33.6,
+      "bad_share": 21.1,
+      "strata_coverage": 98.7
+    }
+  },
+  "clustering": {
+    "mean_ari": 0.303,
+    "mean_purity_pct": 86.3,
+    "mean_noise_pct": 14.2,
+    "novel_prompts_in_noise_pct": 30.7,
+    "true_intents": 18,
+    "persistent_categories": 68
+  },
+  "signals": {
+    "retry_detection": {
+      "precision": 1.0,
+      "recall": 0.8645,
+      "f1": 0.9273,
+      "tp": 402,
+      "predicted": 402,
+      "actual": 465
+    },
+    "latency_outliers": {
+      "precision": 0.875,
+      "recall": 0.9333,
+      "f1": 0.9032,
+      "tp": 126,
+      "predicted": 144,
+      "actual": 135
+    }
+  },
+  "difficulty": {
+    "accuracy_pct": 96.8,
+    "per_class_recall_pct": {
+      "adversarial": 100.0,
+      "hard": 100.0,
+      "moderate": 97.5,
+      "simple": 95.7
+    },
+    "truth_distribution": {
+      "simple": 4210,
+      "moderate": 2121,
+      "hard": 715,
+      "adversarial": 338
+    }
+  },
+  "labeling": {
+    "judge": "mock-judge (heuristic + seeded noise), NOT an LLM",
+    "cases_labeled": 278,
+    "auto_routed": 233,
+    "review_routed": 45,
+    "auto": {
+      "behavior_ok": 99.1,
+      "bucket_ok": 95.3,
+      "polarity_ok": 96.6
+    },
+    "review": {
+      "behavior_ok": 95.6,
+      "bucket_ok": 68.9,
+      "polarity_ok": 71.1
+    },
+    "all": {
+      "behavior_ok": 98.6,
+      "bucket_ok": 91.0,
+      "polarity_ok": 92.4
+    },
+    "run_pairwise_agreement_pct": 94.2,
+    "run0_vs_run1_kappa": 0.875
+  },
+  "dataset": {
+    "nights": 14,
+    "candidates": 4200,
+    "deduped": 3836,
+    "dedup_pct": 91.3,
+    "judge_calls": 834,
+    "active_cases": 233,
+    "pending_review": 45,
+    "categories_with_cases": 50,
+    "true_intents_covered": 18,
+    "by_difficulty": {
+      "simple": 123,
+      "moderate": 57,
+      "hard": 43,
+      "adversarial": 10
+    },
+    "by_polarity": {
+      "negative": 104,
+      "positive": 129
+    },
+    "final_coverage_ratio_pct": 13.4,
+    "freshness_30d_pct": 100.0,
+    "growth": [
+      {
+        "day": "2026-09-14",
+        "auto_added": 55,
+        "queued": 5,
+        "deduped": 175,
+        "total_active": 55
+      },
+      {
+        "day": "2026-09-15",
+        "auto_added": 50,
+        "queued": 10,
+        "deduped": 219,
+        "total_active": 105
+      },
+      {
+        "day": "2026-09-16",
+        "auto_added": 36,
+        "queued": 8,
+        "deduped": 256,
+        "total_active": 141
+      },
+      {
+        "day": "2026-09-17",
+        "auto_added": 11,
+        "queued": 4,
+        "deduped": 285,
+        "total_active": 152
+      },
+      {
+        "day": "2026-09-18",
+        "auto_added": 14,
+        "queued": 6,
+        "deduped": 280,
+        "total_active": 166
+      },
+      {
+        "day": "2026-09-19",
+        "auto_added": 16,
+        "queued": 1,
+        "deduped": 283,
+        "total_active": 182
+      },
+      {
+        "day": "2026-09-20",
+        "auto_added": 11,
+        "queued": 3,
+        "deduped": 286,
+        "total_active": 193
+      },
+      {
+        "day": "2026-09-21",
+        "auto_added": 7,
+        "queued": 2,
+        "deduped": 291,
+        "total_active": 200
+      },
+      {
+        "day": "2026-09-22",
+        "auto_added": 9,
+        "queued": 2,
+        "deduped": 289,
+        "total_active": 209
+      },
+      {
+        "day": "2026-09-23",
+        "auto_added": 6,
+        "queued": 0,
+        "deduped": 294,
+        "total_active": 215
+      },
+      {
+        "day": "2026-09-24",
+        "auto_added": 7,
+        "queued": 0,
+        "deduped": 293,
+        "total_active": 222
+      },
+      {
+        "day": "2026-09-25",
+        "auto_added": 5,
+        "queued": 2,
+        "deduped": 293,
+        "total_active": 227
+      },
+      {
+        "day": "2026-09-26",
+        "auto_added": 3,
+        "queued": 2,
+        "deduped": 295,
+        "total_active": 230
+      },
+      {
+        "day": "2026-09-27",
+        "auto_added": 3,
+        "queued": 0,
+        "deduped": 297,
+        "total_active": 233
+      }
+    ]
+  },
+  "eval": {
+    "cases": 233,
+    "v1": {
+      "pass_rate_pct": 95.7,
+      "mean_score": 0.9857
+    },
+    "v2": {
+      "pass_rate_pct": 90.1,
+      "mean_score": 0.9485
+    },
+    "new_failures": 13,
+    "new_passes": 0,
+    "new_failures_by_true_intent": {
+      "prompt_injection": 4,
+      "sql_window": 3,
+      "sql_aggregate": 3,
+      "sql_join": 3
+    },
+    "new_failures_in_injected_regression_areas_pct": 100.0,
+    "injected_area_cases_caught_pct": 68.4,
+    "category_shifts": 8,
+    "regressed": true
+  }
+}

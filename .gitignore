@@ -11,3 +11,6 @@ dist/
 .ttshow.py
 .ttout/
 .testteeth*/
+*.db-shm
+*.db-wal
+*.npz
