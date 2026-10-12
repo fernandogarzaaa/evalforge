@@ -12,6 +12,6 @@ First tagged release. Not published to PyPI; install from this repository (`pip 
 
 ### Added
 - Log-to-eval-dataset pipeline and `evalforge` CLI: JSONL, OpenTelemetry GenAI span and SQLite adapters; PII/secret redaction; embedding dedup and clustering; LLM-judge labelling; anomaly flags; nightly selection of novel and failed cases; dataset export and eval runs.
-- Non-root Docker image, smoke-tested in CI; Python 3.11+.
+- Non-root Docker image, smoke-tested in CI; Python 3.10+ (CI covers 3.10–3.12).
 - Docs: README onboarding guide, ARCHITECTURE, DATASET_FORMAT.
 - Test suite with per-module mutation grades (testteeth) and a non-blocking weekly mutation workflow; measured before/after table in the README.
