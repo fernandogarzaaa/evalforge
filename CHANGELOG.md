@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-13
+
+### Fixed
+- CLI: missing input files, invalid JSON and an unusable `--db` now print a one-line error and exit 2 instead of a traceback (#2).
+
 ## [0.1.0] - 2026-10-13
 
 First tagged release. Not published to PyPI; install from this repository (`pip install .`) or use the Docker image built from the `Dockerfile`.
