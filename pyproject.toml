@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evalforge"
-version = "0.1.0"
+version = "0.1.1"
 description = "Turn production LLM logs into a growing, labeled, deduplicated evaluation dataset."
 readme = "README.md"
 requires-python = ">=3.10"
