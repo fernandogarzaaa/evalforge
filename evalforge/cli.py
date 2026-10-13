@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sqlite3
 import sys
 import time
 from datetime import datetime, timezone
@@ -329,7 +330,12 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    return int(args.func(args))
+    try:
+        return int(args.func(args))
+    except (OSError, ValueError, sqlite3.Error) as exc:
+        # bad paths, unreadable/invalid JSON, unusable --db: one line, exit 2
+        print(f"evalforge {args.command}: error: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
